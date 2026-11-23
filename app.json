@@ -8,32 +8,32 @@
   "env": {
     "API_ID": {
       "description": "Get this value from https://my.telegram.org",
-      "value": "",
+      "value": "31576348",
       "required": true
     },
     "API_HASH": {
       "description": "Get this value from https://my.telegram.org",
-      "value": "",
+      "value": "b036c1a134fcbf3f5b3cc2f9af2415ac",
       "required": true
     },
     "BOT_TOKEN": {
       "description": "Bot token from @BotFather",
-      "value": "",
+      "value": "9112351753:AAH_hVG5TS5pk1wRKvLONbS9GNCfOwzzEbg",
       "required": true
     },
     "MONGO_DB": {
       "description": "MongoDB connection URL (https://cloud.mongodb.com)",
-      "value": "",
+      "value": "mongodb+srv://Rajeshkumaryadav9414:Raosahab9414@atlascluster.qvlner6.mongodb.net/",
       "required": true
     },
     "OWNER_ID": {
       "description": "User ID(s) to be set as bot owner(s), separated by space (e.g., 1234 5678)",
-      "value": "",
+      "value": "5999785669",
       "required": true
     },
     "DB_NAME": {
       "description": "Database name for MongoDB (default: telegram_downloader)",
-      "value": "telegram_downloader",
+      "value": "RAO_RAJESH",
       "required": false
     },
     "STRING": {
@@ -43,12 +43,12 @@
     },
     "FORCE_SUB": {
       "description": "Channel ID (with -100 prefix) for forced subscription",
-      "value": "-10012345567",
+      "value": "0",
       "required": true
     },
     "LOG_GROUP": {
       "description": "Log channel/group ID (with -100 prefix) where the bot will send logs",
-      "value": "-1001234456",
+      "value": "0",
       "required": true
     },
     "MASTER_KEY": {
@@ -83,12 +83,12 @@
     },
     "ADMIN_CONTACT": {
       "description": "type admin contact link",
-      "value": "https://t.me/kingofpatal",
+      "value": "0",
       "required": true
     },
     "JOIN_LINK": {
       "description": "type join channel link which comes on /start",
-      "value": "https://t.me/team_spy_pro",
+      "value": "0",
       "required": true
     }
   },
@@ -98,3 +98,4 @@
   ],
   "stack": "container"
 }
+

@@ -70,6 +70,43 @@ async def extract_audio_async(ydl_opts, url):
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             return ydl.extract_info(url, download=True)
     return await asyncio.get_event_loop().run_in_executor(thread_pool, sync_extract)
+
+
+def make_download_progress_hook(progress_message, loop, label="Downloading"):
+    last_update = [0.0]
+
+    def hook(data):
+        status = data.get("status")
+        now = time.time()
+        if status == "downloading":
+            if now - last_update[0] < 2:
+                return
+            last_update[0] = now
+            downloaded = data.get("downloaded_bytes") or 0
+            total = data.get("total_bytes") or data.get("total_bytes_estimate") or 0
+            speed = data.get("speed") or 0
+            eta = data.get("eta")
+            if total > 0:
+                percent = min(100, downloaded * 100 / total)
+                blocks = min(10, int(percent // 10))
+                bar = "♦" * blocks + "◇" * (10 - blocks)
+                details = f"{percent:.1f}% | {downloaded / 1048576:.1f}/{total / 1048576:.1f} MB"
+            else:
+                bar = "◇" * 10
+                details = f"{downloaded / 1048576:.1f} MB downloaded | Total size unknown"
+            speed_text = f"{speed / 1048576:.2f} MB/s" if speed else "Calculating..."
+            eta_text = TimeFormatter(eta * 1000) if eta is not None else "Calculating..."
+            message = f"**__{label}...__**\n{bar}\n**Progress:** {details}\n**Speed:** {speed_text}\n**ETA:** {eta_text}"
+        elif status == "finished":
+            message = f"**__{label} complete. Processing file...__**"
+        else:
+            return
+        try:
+            asyncio.run_coroutine_threadsafe(progress_message.edit(message), loop)
+        except Exception:
+            pass
+
+    return hook
  
  
 def get_random_string(length=7):
@@ -103,7 +140,9 @@ async def process_audio(client, event, url, cookies_env_var=None):
     prog = None
  
     progress_message = await event.reply("**__Starting audio extraction...__**")
- 
+    loop = asyncio.get_running_loop()
+    ydl_opts["progress_hooks"] = [make_download_progress_hook(progress_message, loop, "Audio download")]
+
     try:
          
         info_dict = await extract_audio_async(ydl_opts, url)
@@ -262,7 +301,8 @@ def progress_callback(done, total, user_id):
     user_data = user_progress[user_id]
  
      
-    percent = (done / total) * 100
+    total = total or 0
+    percent = min(100, (done / total) * 100) if total else 0
  
      
     completed_blocks = int(percent // 10)
@@ -277,11 +317,8 @@ def progress_callback(done, total, user_id):
     speed = done - user_data['previous_done']
     elapsed_time = time.time() - user_data['previous_time']
  
-    if elapsed_time > 0:
-        speed_bps = speed / elapsed_time   
-        speed_mbps = (speed_bps * 8) / (1024 * 1024)   
-    else:
-        speed_mbps = 0
+    speed_bps = speed / elapsed_time if elapsed_time > 0 else 0
+    speed_mbps = (speed_bps * 8) / (1024 * 1024)
  
      
     if speed_bps > 0:
@@ -347,6 +384,8 @@ async def process_video(client, event, url, cookies_env_var, check_duration_and_
     }
     prog = None
     progress_message = await event.reply("**__Starting download...__**")
+    loop = asyncio.get_running_loop()
+    ydl_opts["progress_hooks"] = [make_download_progress_hook(progress_message, loop, "Video download")]
     logger.info("Starting the download process...")
     try:
         info_dict = await fetch_video_info(url, ydl_opts, progress_message, check_duration_and_size)
